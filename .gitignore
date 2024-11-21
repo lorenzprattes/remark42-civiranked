@@ -26,3 +26,5 @@ compose-private.yml
 http-client.env.json
 /playwright-report/
 /backend/app/cmd/var
+/.pnpm-store 
+.devcontainer

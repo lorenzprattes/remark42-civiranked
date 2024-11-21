@@ -14,6 +14,7 @@ services:
       args:
         - SKIP_BACKEND_TEST=true
         - SKIP_FRONTEND_BUILD=true
+        - SKIP_FRONTEND_TEST=true
         # - NODE_ENV=development
 
     image: umputun/remark42:dev

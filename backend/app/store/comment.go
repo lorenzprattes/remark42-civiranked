@@ -29,6 +29,7 @@ type Comment struct {
 	Deleted     bool                   `json:"delete,omitempty" bson:"delete"`
 	Imported    bool                   `json:"imported,omitempty" bson:"imported"`
 	PostTitle   string                 `json:"title,omitempty" bson:"title"`
+	Rank        int                    `json:"rank"`
 }
 
 // Locator keeps site and url of the post

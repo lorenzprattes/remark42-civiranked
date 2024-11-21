@@ -4,6 +4,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "cross-env REMARK_URL=http://127.0.0.1:8080 pnpm dev:custom",
+    "dev:backend": "cross-env REMARK_URL=http://remark42-dev:8080 pnpm dev:custom",
     "dev:demo": "cross-env REMARK_API_BASE_URL=https://demo.remark42.com pnpm dev:custom",
     "dev:custom": "webpack serve --mode development",
     "build": "webpack --mode production",

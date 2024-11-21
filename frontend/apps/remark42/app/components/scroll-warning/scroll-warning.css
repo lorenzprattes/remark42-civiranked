@@ -1,0 +1,25 @@
+.scroll-warning {
+  display: block;
+  max-width: 600px;
+  margin: 20px auto;
+  padding: 7px 12px;
+  box-sizing: border-box;
+  background: var(--color5);
+  border: 1px solid var(--error-color);
+  border-radius: 4px;
+  color: var(--error-color);
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 20px;
+  width: 100%;
+  text-align: center;
+  cursor: default;
+}
+
+.scroll-warning_text {
+  display: block;
+  font-size: 16px; /* Set the font size for the text */
+  text-align: center; /* Center align the text */
+  font-weight: 400;
+  color: var(--color10); /* Set the text color */
+}

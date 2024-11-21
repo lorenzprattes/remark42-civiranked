@@ -63,6 +63,8 @@ export interface Comment {
   delete?: boolean;
   /** post title */
   title?: string;
+  /** ranker position, 0 is the scroll warning limit */
+  rank?: number;
   /**
    * @ClientOnly defines whether comments was hidden (deleted)
    *

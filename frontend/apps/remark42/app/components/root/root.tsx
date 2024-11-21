@@ -6,7 +6,7 @@ import { IntlShape, useIntl, FormattedMessage, defineMessages } from 'react-intl
 import clsx from 'clsx';
 
 import 'styles/global.css';
-import type { StoreState } from 'store';
+import type { StoreState, useAppSelector } from 'store';
 import { COMMENT_NODE_CLASSNAME_PREFIX, MAX_SHOWN_ROOT_COMMENTS, THEMES, IS_MOBILE } from 'common/constants';
 import { maxShownComments, noFooter, url } from 'common/settings';
 
@@ -40,6 +40,8 @@ import { useActions } from 'hooks/useAction';
 import { setCollapse } from 'store/thread/actions';
 
 import styles from './root.module.css';
+import { topCommentsWithRank } from 'store/comments/reducers';
+import { ScrollWarning } from 'components/scroll-warning/';
 
 const mapStateToProps = (state: StoreState) => ({
   sort: state.comments.sort,
@@ -54,6 +56,7 @@ const mapStateToProps = (state: StoreState) => ({
   ),
   collapsedThreads: state.collapsedThreads,
   topComments: state.comments.topComments,
+  topCommentsWithRank: state.comments.topCommentsWithRank,
   pinnedComments: state.comments.pinnedComments.map((id) => state.comments.allComments[id]).filter((c) => !c.hidden),
   theme: state.theme,
   info: state.info,
@@ -275,6 +278,7 @@ export class Root extends Component<Props, State> {
                 isLoading={props.isCommentsLoading}
                 topComments={props.topComments}
                 showMore={this.showMore}
+                topCommentsWithRank={props.topCommentsWithRank}
               />
             </>
           )}
@@ -289,22 +293,45 @@ interface CommentsProps {
   topComments: string[];
   commentsShown: number;
   showMore(): void;
+  topCommentsWithRank: Record<string, number>;
 }
-function Comments({ isLoading, topComments, commentsShown, showMore }: CommentsProps) {
+function Comments({ isLoading, topComments, commentsShown, showMore, topCommentsWithRank }: CommentsProps) {
   const renderComments =
     IS_MOBILE && commentsShown < topComments.length ? topComments.slice(0, commentsShown) : topComments;
-  const isShowMoreButtonVisible = IS_MOBILE && commentsShown < topComments.length;
+  const renderCommentsWithRank =
+    IS_MOBILE && commentsShown < topComments.length
+      ? Object.entries(topCommentsWithRank).slice(0, commentsShown)
+      : Object.entries(topCommentsWithRank);
 
+  const isShowMoreButtonVisible = IS_MOBILE && commentsShown < topComments.length;
+  console.log(topCommentsWithRank);
+  console.log(topComments);
   return (
     <div className="root__threads" role="list">
       {isLoading ? (
         <Preloader className="root__preloader" />
       ) : (
         <>
-          {topComments.length > 0 &&
-            renderComments.map((id) => (
-              <Thread key={`thread-${id}`} id={id} mix="root__thread" level={0} getPreview={getPreview} />
-            ))}
+          {/* {topComments.length > 0 &&
+              renderComments.map((id) => {
+                return (
+                  <Thread key={`thread-${id}`} id={id} mix="root__thread" level={0} getPreview={getPreview} />
+                )
+              })} */}
+          {renderComments.length > 0 &&
+            renderCommentsWithRank.map(([id, rank]) => {
+              console.log('test');
+              console.log(id);
+              if (rank === 0) {
+                return (
+                  <>
+                    <ScrollWarning>Scroll Warning</ScrollWarning>
+                    <Thread key={`thread-${id}`} id={id} mix="root__thread" level={0} getPreview={getPreview} />
+                  </>
+                );
+              }
+              return <Thread key={`thread-${id}`} id={id} mix="root__thread" level={0} getPreview={getPreview} />;
+            })}
           {isShowMoreButtonVisible && (
             <Button className={clsx('more-comments', styles.moreComments)} onClick={showMore}>
               <FormattedMessage id="root.show-more" defaultMessage="Show more" />

@@ -44,6 +44,29 @@ export const topComments = (
   }
 };
 
+export const topCommentsWithRank = (
+  state: Record<Comment['id'], number> = {},
+  action: COMMENTS_SET_ACTION | COMMENTS_APPEND_ACTION
+): Record<Comment['id'], number> => {
+  switch (action.type) {
+    case COMMENTS_SET: {
+      return cmpRef(
+        state,
+        action.comments.reduce(
+          (pre, x) => ({ ...pre, [x.comment.id]: x.comment.rank === undefined ? 0 : x.comment.rank }),
+          {}
+        )
+      );
+    }
+    case COMMENTS_APPEND: {
+      if (action.comment.pid) return state;
+      return { [action.comment.id]: action.comment.rank === undefined ? 0 : action.comment.rank ?? 0, ...state };
+    }
+    default:
+      return state;
+  }
+};
+
 const reduceChildIds = (c: Record<Comment['id'], Comment['id'][]>, x: Node): Record<Comment['id'], Comment['id'][]> => {
   if (!x.replies) return c;
   if (!c[x.comment.id]) {
@@ -212,6 +235,7 @@ export const comments = combineReducers({
   sort,
   isFetching,
   topComments,
+  topCommentsWithRank,
   childComments,
   allComments,
   activeComment,
