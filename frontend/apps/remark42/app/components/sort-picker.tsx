@@ -20,7 +20,11 @@ export function SortPicker() {
       '+active': intl.formatMessage(messages.leastRecentlyUpdated),
       '-controversy': intl.formatMessage(messages.mostControversial),
       '+controversy': intl.formatMessage(messages.leastControversial),
+      rank: 'Rank',
+      '-rank': 'Rank',
+      '+rank': 'Rank',
     };
+
     type SortItem = { value: string; label: string };
     const sortItems: SortItem[] = Object.entries(sortOptions).map(([k, v]) => ({ value: k, label: v }));
     const sortById = sortItems.reduce(

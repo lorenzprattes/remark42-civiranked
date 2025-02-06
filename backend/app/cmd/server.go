@@ -89,6 +89,7 @@ type ServerCommand struct {
 	SubscribersOnly            bool          `long:"subscribers-only" env:"SUBSCRIBERS_ONLY" description:"enable commenting only for Patreon subscribers"`
 	DisableSignature           bool          `long:"disable-signature" env:"DISABLE_SIGNATURE" description:"disable server signature in headers"`
 	DisableFancyTextFormatting bool          `long:"disable-fancy-text-formatting" env:"DISABLE_FANCY_TEXT_FORMATTING" description:"disable fancy comments text formatting (replacement of quotes, dashes, fractions, etc)"`
+	CivirankAdress             string        `long:"civirank-address" env:"CIVIRANK_ADDRESS" description:"The address running the civiranker"`
 
 	Auth struct {
 		TTL struct {
@@ -311,6 +312,8 @@ type serverApp struct {
 // Execute is the entry point for "server" command, called by flag parser
 func (s *ServerCommand) Execute(_ []string) error {
 	log.Printf("[INFO] start server on port %s:%d", s.Address, s.Port)
+	log.Printf("[INFO] civirank on %s:%d", s.CivirankAdress, s.Port)
+
 	resetEnv(
 		"SECRET",
 		"AUTH_GOOGLE_CSEC",

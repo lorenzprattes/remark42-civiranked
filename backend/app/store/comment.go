@@ -30,6 +30,7 @@ type Comment struct {
 	Imported    bool                   `json:"imported,omitempty" bson:"imported"`
 	PostTitle   string                 `json:"title,omitempty" bson:"title"`
 	Rank        int                    `json:"rank"`
+	Warning     bool                   `json:"warning"`
 }
 
 // Locator keeps site and url of the post

@@ -16,7 +16,7 @@ const babelConfig = require('./.babelrc.js');
 
 const NODE_ID = 'remark42';
 const PUBLIC_PATH = '/web/';
-const PORT = process.env.PORT || 9000;
+const PORT = process.env.PORT || 9001;
 const REMARK_API_BASE_URL = process.env.REMARK_API_BASE_URL || 'http://127.0.0.1:8080';
 const DEVSERVER_BASE_PATH = process.env.DEVSERVER_BASE_PATH || `http://127.0.0.1:${PORT}`;
 const PUBLIC_FOLDER_PATH = path.resolve(__dirname, 'public');

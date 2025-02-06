@@ -44,23 +44,20 @@ export const topComments = (
   }
 };
 
-export const topCommentsWithRank = (
-  state: Record<Comment['id'], number> = {},
+export const topCommentsWithWarning = (
+  state: Record<Comment['id'], boolean> = {},
   action: COMMENTS_SET_ACTION | COMMENTS_APPEND_ACTION
-): Record<Comment['id'], number> => {
+): Record<Comment['id'], boolean> => {
   switch (action.type) {
     case COMMENTS_SET: {
       return cmpRef(
         state,
-        action.comments.reduce(
-          (pre, x) => ({ ...pre, [x.comment.id]: x.comment.rank === undefined ? 0 : x.comment.rank }),
-          {}
-        )
+        action.comments.reduce((pre, x) => ({ ...pre, [x.comment.id]: x.comment.warning }), {})
       );
     }
     case COMMENTS_APPEND: {
       if (action.comment.pid) return state;
-      return { [action.comment.id]: action.comment.rank === undefined ? 0 : action.comment.rank ?? 0, ...state };
+      return { [action.comment.id]: action.comment.warning ?? false, ...state };
     }
     default:
       return state;
@@ -235,7 +232,7 @@ export const comments = combineReducers({
   sort,
   isFetching,
   topComments,
-  topCommentsWithRank,
+  topCommentsWithWarning,
   childComments,
   allComments,
   activeComment,

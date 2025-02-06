@@ -110,6 +110,37 @@ func (s *DataStore) Create(comment store.Comment) (commentID string, err error) 
 	if e := s.AdminStore.OnEvent(comment.Locator.SiteID, admin.EvCreate); e != nil {
 		log.Printf("[WARN] failed to send create event, %s", e)
 	}
+
+	// ranker comes here
+
+	
+	// 1. get all comments for site
+	req := engine.FindRequest{Locator: comment.Locator, Sort: "time", Since: time.Time{}}
+	comments, err := s.Engine.Find(req)
+	fmt.Println("comments when saved:")
+	fmt.Println(comments)
+
+	comments = rank(comments)
+
+	for _, comment := range comments {
+		err = s.Engine.Update(comment)
+		if err != nil {
+			fmt.Println("error updating comment")
+			fmt.Println(err)
+		}
+	}
+
+	newcomments, err := s.Engine.Find(req)
+	fmt.Println("comments overwritten:")
+	fmt.Println(newcomments)
+	// 2. prepare ranking request
+
+	// 3. send ranking request
+
+	// 4. get ranking response
+
+	// 5. update ranks for all comments
+
 	return commentID, err
 }
 

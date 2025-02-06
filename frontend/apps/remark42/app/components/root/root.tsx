@@ -6,7 +6,7 @@ import { IntlShape, useIntl, FormattedMessage, defineMessages } from 'react-intl
 import clsx from 'clsx';
 
 import 'styles/global.css';
-import type { StoreState, useAppSelector } from 'store';
+import type { StoreState } from 'store';
 import { COMMENT_NODE_CLASSNAME_PREFIX, MAX_SHOWN_ROOT_COMMENTS, THEMES, IS_MOBILE } from 'common/constants';
 import { maxShownComments, noFooter, url } from 'common/settings';
 
@@ -40,7 +40,6 @@ import { useActions } from 'hooks/useAction';
 import { setCollapse } from 'store/thread/actions';
 
 import styles from './root.module.css';
-import { topCommentsWithRank } from 'store/comments/reducers';
 import { ScrollWarning } from 'components/scroll-warning/';
 
 const mapStateToProps = (state: StoreState) => ({
@@ -56,7 +55,7 @@ const mapStateToProps = (state: StoreState) => ({
   ),
   collapsedThreads: state.collapsedThreads,
   topComments: state.comments.topComments,
-  topCommentsWithRank: state.comments.topCommentsWithRank,
+  topCommentsWithWarning: state.comments.topCommentsWithWarning,
   pinnedComments: state.comments.pinnedComments.map((id) => state.comments.allComments[id]).filter((c) => !c.hidden),
   theme: state.theme,
   info: state.info,
@@ -278,7 +277,7 @@ export class Root extends Component<Props, State> {
                 isLoading={props.isCommentsLoading}
                 topComments={props.topComments}
                 showMore={this.showMore}
-                topCommentsWithRank={props.topCommentsWithRank}
+                topCommentsWithWarning={props.topCommentsWithWarning}
               />
             </>
           )}
@@ -293,18 +292,18 @@ interface CommentsProps {
   topComments: string[];
   commentsShown: number;
   showMore(): void;
-  topCommentsWithRank: Record<string, number>;
+  topCommentsWithWarning: Record<string, boolean>;
 }
-function Comments({ isLoading, topComments, commentsShown, showMore, topCommentsWithRank }: CommentsProps) {
+function Comments({ isLoading, topComments, commentsShown, showMore, topCommentsWithWarning }: CommentsProps) {
   const renderComments =
     IS_MOBILE && commentsShown < topComments.length ? topComments.slice(0, commentsShown) : topComments;
-  const renderCommentsWithRank =
+  const renderCommentsWithWarning =
     IS_MOBILE && commentsShown < topComments.length
-      ? Object.entries(topCommentsWithRank).slice(0, commentsShown)
-      : Object.entries(topCommentsWithRank);
+      ? Object.entries(topCommentsWithWarning).slice(0, commentsShown)
+      : Object.entries(topCommentsWithWarning);
 
   const isShowMoreButtonVisible = IS_MOBILE && commentsShown < topComments.length;
-  console.log(topCommentsWithRank);
+  console.log(topCommentsWithWarning);
   console.log(topComments);
   return (
     <div className="root__threads" role="list">
@@ -319,10 +318,10 @@ function Comments({ isLoading, topComments, commentsShown, showMore, topComments
                 )
               })} */}
           {renderComments.length > 0 &&
-            renderCommentsWithRank.map(([id, rank]) => {
+            renderCommentsWithWarning.map(([id, warning]) => {
               console.log('test');
               console.log(id);
-              if (rank === 0) {
+              if (warning) {
                 return (
                   <>
                     <ScrollWarning>Scroll Warning</ScrollWarning>

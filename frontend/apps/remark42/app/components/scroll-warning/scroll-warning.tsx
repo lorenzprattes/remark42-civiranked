@@ -1,9 +1,7 @@
 import clsx from 'clsx';
 import { h, JSX } from 'preact';
 import { forwardRef } from 'preact/compat';
-import b, { Mods, Mix } from 'bem-react-helper';
-
-import type { Theme } from 'common/types';
+import b from 'bem-react-helper';
 
 export const ScrollWarning = forwardRef<HTMLDivElement, JSX.IntrinsicElements['div']>((props, ref) => (
   <div className={clsx(b('scroll-warning'))} ref={ref}>

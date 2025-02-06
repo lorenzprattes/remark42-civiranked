@@ -17,6 +17,11 @@ services:
         - SKIP_FRONTEND_TEST=true
         # - NODE_ENV=development
 
+    develop:
+      watch:
+        - action: rebuild
+          path: backend
+
     image: umputun/remark42:dev
     container_name: "remark42-dev"
     hostname: "remark42-dev"
@@ -42,5 +47,13 @@ services:
       - ADMIN_SHARED_ID=dev_user # set admin flag for default user on local oauth2
       - AUTH_ANON=true
       - AUTH_EMAIL_ENABLE=true
+      - CIVIRANK_ADDRESS="http://civirank:8000/rank_comments"
     volumes:
       - ./var:/srv/var
+    networks:
+      - network1
+networks:
+  network1:
+    name: dev-network
+    external: true
+

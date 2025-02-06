@@ -63,8 +63,12 @@ export interface Comment {
   delete?: boolean;
   /** post title */
   title?: string;
-  /** ranker position, 0 is the scroll warning limit */
+  /** ranker position */
+
   rank?: number;
+  /**display a warning here if true */
+
+  warning?: boolean;
   /**
    * @ClientOnly defines whether comments was hidden (deleted)
    *
@@ -125,7 +129,18 @@ export interface Config {
   emoji_enabled: boolean;
 }
 
-export type Sorting = '-time' | '+time' | '-active' | '+active' | '-score' | '+score' | '-controversy' | '+controversy';
+export type Sorting =
+  | '-time'
+  | '+time'
+  | '-active'
+  | '+active'
+  | '-score'
+  | '+score'
+  | '-controversy'
+  | '+controversy'
+  | 'rank'
+  | '-rank'
+  | '+rank';
 export type BlockTTL = 'permanently' | '43200m' | '10080m' | '1440m';
 export type Theme = 'light' | 'dark';
 

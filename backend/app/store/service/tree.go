@@ -1,7 +1,6 @@
 package service
 
 import (
-	"net/http"
 	"sort"
 	"strings"
 	"time"
@@ -144,44 +143,16 @@ func (t *Tree) sortNodes(sortType string) {
 			return t.Nodes[i].Comment.Controversy < t.Nodes[j].Comment.Controversy
 
 		case "+rank", "-rank", "rank":
-			// Make a request to the remote server to rank the comments
-			resp, err := http.Get("https://remote-server.com/api/rank?comment1=" + t.Nodes[i].Comment.ID + "&comment2=" + t.Nodes[j].Comment.ID)
-			if err != nil {
-				// Handle error, default to local rank comparison
-				if strings.HasPrefix(sortType, "-") {
-					return t.Nodes[i].Comment.Rank > t.Nodes[j].Comment.Rank
-				}
-				return t.Nodes[i].Comment.Rank < t.Nodes[j].Comment.Rank
-			}
-			defer resp.Body.Close()
-
-			// Read the response body
-			body, err := ioutil.ReadAll(resp.Body)
-			if err != nil {
-				// Handle error, default to local rank comparison
-				if strings.HasPrefix(sortType, "-") {
-					return t.Nodes[i].Comment.Rank > t.Nodes[j].Comment.Rank
-				}
-				return t.Nodes[i].Comment.Rank < t.Nodes[j].Comment.Rank
-			}
-
-			// Parse the response
-			var result struct {
-				Rank int `json:"rank"`
-			}
-			if err := json.Unmarshal(body, &result); err != nil {
-				// Handle error, default to local rank comparison
-				if strings.HasPrefix(sortType, "-") {
-					return t.Nodes[i].Comment.Rank > t.Nodes[j].Comment.Rank
-				}
-				return t.Nodes[i].Comment.Rank < t.Nodes[j].Comment.Rank
-			}
-
-			// Use the rank from the remote server
 			if strings.HasPrefix(sortType, "-") {
-				return result.Rank > 0
+				if t.Nodes[i].Comment.Rank == t.Nodes[j].Comment.Rank {
+					return t.Nodes[i].Comment.Timestamp.Before(t.Nodes[j].Comment.Timestamp)
+				}
+				return t.Nodes[i].Comment.Rank > t.Nodes[j].Comment.Rank
 			}
-			return result.Rank < 0
+			if t.Nodes[i].Comment.Rank == t.Nodes[j].Comment.Rank {
+				return t.Nodes[i].Comment.Timestamp.Before(t.Nodes[j].Comment.Timestamp)
+			}
+			return t.Nodes[i].Comment.Rank < t.Nodes[j].Comment.Rank
 		default:
 			return t.Nodes[i].Comment.Timestamp.Before(t.Nodes[j].Comment.Timestamp)
 		}

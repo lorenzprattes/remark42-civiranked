@@ -14,6 +14,7 @@ import (
 	"github.com/umputun/remark42/backend/app/cmd"
 )
 
+
 // Opts with all cli commands and flags
 type Opts struct {
 	ServerCmd  cmd.ServerCommand  `command:"server"`
