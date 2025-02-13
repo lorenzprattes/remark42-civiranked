@@ -38,14 +38,12 @@ func MakeTree(comments []store.Comment, sortType string) *Tree {
 
 	topComments := res.filter(comments, func(c store.Comment) bool { return c.ParentID == "" })
 
-	var topCommentLen int = len(topComments)
 	res.Nodes = []*Node{}
-	for id, rootComment := range topComments {
-		rootComment.Rank = topCommentLen/2 - id
+	for _, rootComment := range topComments {
 		node := Node{Comment: rootComment}
 
 		rd := recurData{}
-		commentsTree := res.proc(comments, &node, &rd, rootComment.ID)
+		commentsTree := res.proc(comments, &node, &rd, rootComment.ID, sortType)
 		// skip deleted with no sub-comments and all sub-comments deleted
 		if rootComment.Deleted && (len(commentsTree.Replies) == 0 || !rd.visible) {
 			continue
@@ -59,7 +57,7 @@ func MakeTree(comments []store.Comment, sortType string) *Tree {
 }
 
 // proc makes tree for one top-level comment recursively
-func (t *Tree) proc(comments []store.Comment, node *Node, rd *recurData, parentID string) (result *Node) {
+func (t *Tree) proc(comments []store.Comment, node *Node, rd *recurData, parentID string, sortType string) (result *Node) {
 	if rd.tsModified.IsZero() || rd.tsCreated.IsZero() {
 		rd.tsModified, rd.tsCreated = node.Comment.Timestamp, node.Comment.Timestamp
 	}
@@ -77,15 +75,24 @@ func (t *Tree) proc(comments []store.Comment, node *Node, rd *recurData, parentI
 		}
 		rnode := &Node{Comment: rc, Replies: []*Node{}}
 		node.Replies = append(node.Replies, rnode)
-		t.proc(comments, rnode, rd, rc.ID)
+		t.proc(comments, rnode, rd, rc.ID, sortType)
 		if !rd.visible || (len(rnode.Replies) == 0 && rc.Deleted) { // clean all-deleted subtree
 			node.Replies = node.Replies[:len(node.Replies)-1]
 		}
 	}
-	// replies always sorted by time
-	sort.Slice(node.Replies, func(i, j int) bool {
-		return node.Replies[i].Comment.Timestamp.Before(node.Replies[j].Comment.Timestamp)
-	})
+	// replies always sorted by time unless sortType is rank
+	if sortType != "rank" {
+		sort.Slice(node.Replies, func(i, j int) bool {
+			return node.Replies[i].Comment.Timestamp.Before(node.Replies[j].Comment.Timestamp)
+		})
+	} else {
+		sort.Slice(node.Replies, func(i, j int) bool {
+			if node.Replies[i].Comment.Rank == node.Replies[j].Comment.Rank {
+				return node.Replies[i].Comment.Timestamp.Before(node.Replies[j].Comment.Timestamp)
+			}
+			return node.Replies[i].Comment.Rank < node.Replies[j].Comment.Rank
+		})
+	}
 	node.tsModified, node.tsCreated = rd.tsModified, rd.tsCreated
 	return node
 }
@@ -142,7 +149,7 @@ func (t *Tree) sortNodes(sortType string) {
 			}
 			return t.Nodes[i].Comment.Controversy < t.Nodes[j].Comment.Controversy
 
-		case "+rank", "-rank", "rank":
+		case "rank":
 			if strings.HasPrefix(sortType, "-") {
 				if t.Nodes[i].Comment.Rank == t.Nodes[j].Comment.Rank {
 					return t.Nodes[i].Comment.Timestamp.Before(t.Nodes[j].Comment.Timestamp)

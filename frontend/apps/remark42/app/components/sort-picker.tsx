@@ -20,9 +20,7 @@ export function SortPicker() {
       '+active': intl.formatMessage(messages.leastRecentlyUpdated),
       '-controversy': intl.formatMessage(messages.mostControversial),
       '+controversy': intl.formatMessage(messages.leastControversial),
-      rank: 'Rank',
-      '-rank': 'Rank',
-      '+rank': 'Rank',
+      rank: intl.formatMessage(messages.rank),
     };
 
     type SortItem = { value: string; label: string };
@@ -87,5 +85,9 @@ const messages = defineMessages({
   leastControversial: {
     id: 'commentsSort.least-controversial',
     defaultMessage: 'Least controversial',
+  },
+  rank: {
+    id: 'commentsSort.rank',
+    defaultMessage: 'Ranked by Civirank',
   },
 });

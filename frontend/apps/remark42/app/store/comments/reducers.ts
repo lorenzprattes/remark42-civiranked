@@ -1,4 +1,4 @@
-import { Node, Comment, CommentMode, Sorting } from 'common/types';
+import { Node, Comment, CommentMode, Sorting, CommentWithRanking } from 'common/types';
 import { combineReducers } from 'redux';
 
 import {
@@ -45,19 +45,19 @@ export const topComments = (
 };
 
 export const topCommentsWithWarning = (
-  state: Record<Comment['id'], boolean> = {},
+  state: CommentWithRanking[] = [],
   action: COMMENTS_SET_ACTION | COMMENTS_APPEND_ACTION
-): Record<Comment['id'], boolean> => {
+): CommentWithRanking[] => {
   switch (action.type) {
     case COMMENTS_SET: {
       return cmpRef(
         state,
-        action.comments.reduce((pre, x) => ({ ...pre, [x.comment.id]: x.comment.warning }), {})
+        action.comments.map((x) => ({ id: x.comment.id, rank: x.comment.rank }))
       );
     }
     case COMMENTS_APPEND: {
       if (action.comment.pid) return state;
-      return { [action.comment.id]: action.comment.warning ?? false, ...state };
+      return [{ id: action.comment.id, rank: action.comment.rank }, ...state];
     }
     default:
       return state;

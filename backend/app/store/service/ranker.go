@@ -22,17 +22,15 @@ type RankingResponse struct {
 	WarningIndex int            `json:"warning_index"`
 }
 
-func rank(comments []store.Comment) []store.Comment {
+func rank(comments []store.Comment, rankerUrl string) ([]store.Comment, int) {
 	var rankingRequest []RankingRequest
 	for _, comment := range comments {
-		if comment.ParentID == "" {
-			rankingRequest = append(rankingRequest, RankingRequest{
-				ID:        comment.ID,
-				ParentID:  comment.ParentID,
-				PostTitle: comment.PostTitle,
-				Text:      comment.Text,
-			})
-		}
+		rankingRequest = append(rankingRequest, RankingRequest{
+			ID:        comment.ID,
+			ParentID:  comment.ParentID,
+			PostTitle: comment.PostTitle,
+			Text:      comment.Text,
+		})
 	}
 	// Add the comments to a JSON object
 	jsonData := map[string]interface{}{
@@ -48,16 +46,12 @@ func rank(comments []store.Comment) []store.Comment {
 	}
 
 	// Create a new POST request with the JSON data
-	url := "http://civirank:8000/rank_comments"
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(rankingRequestsJSON))
+	req, err := http.NewRequest("POST", rankerUrl, bytes.NewBuffer(rankingRequestsJSON))
 	if err != nil {
 		fmt.Println("Error creating request:", err)
 	}
-
-	// Set the appropriate headers
 	req.Header.Set("Content-Type", "application/json")
 
-	// Send the request using http.Client
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -71,8 +65,6 @@ func rank(comments []store.Comment) []store.Comment {
 	} else {
 		fmt.Printf("Request failed with status code: %d\n", resp.StatusCode)
 	}
-
-	// Read the response body
 	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println("Error reading response body:", err)
@@ -80,7 +72,7 @@ func rank(comments []store.Comment) []store.Comment {
 
 	bodyString := string(bodyBytes)
 	fmt.Println("Ranking requests JSON:", bodyString)
-	// Parse the response
+
 	var result RankingResponse
 	if err := json.Unmarshal(bodyBytes, &result); err != nil {
 		// Handle error, default to local rank comparison
@@ -99,5 +91,5 @@ func rank(comments []store.Comment) []store.Comment {
 			comments[i].Warning = false
 		}
 	}
-	return comments
+	return comments, result.WarningIndex
 }

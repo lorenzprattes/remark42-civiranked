@@ -514,6 +514,7 @@ func (s *ServerCommand) newServerApp(ctx context.Context) (*serverApp, error) {
 		ImageService:           imageService,
 		TitleExtractor:         service.NewTitleExtractor(http.Client{Timeout: time.Second * 5}, s.getAllowedDomains()),
 		RestrictedWordsMatcher: service.NewRestrictedWordsMatcher(service.StaticRestrictedWordsLister{Words: s.RestrictedWords}),
+		RankerUrl:              s.CivirankAdress,
 	}
 	dataService.RestrictSameIPVotes.Enabled = s.RestrictVoteIP
 	dataService.RestrictSameIPVotes.Duration = s.DurationVoteIP

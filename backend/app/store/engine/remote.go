@@ -145,3 +145,24 @@ func (r *RPC) Close() error {
 	r.Client.Client.CloseIdleConnections()
 	return err
 }
+
+func (r *RPC) SetScrollWarning(locator store.Locator, scrollWarning int) (store.PostInfo, error) {
+	req := InfoRequest{Locator: locator}
+	resp, err := r.Call("store.info", req)
+	if err != nil {
+		return store.PostInfo{}, err
+	}
+	var info store.PostInfo
+	err = json.Unmarshal(*resp.Result, &info)
+	if err != nil {
+		return info, err
+	}
+	info.ScrollWarning = scrollWarning
+	resp, err = r.Call("store.setScrollWarning", info)
+	if err != nil {
+		return info, err
+	}
+	var updatedInfo store.PostInfo
+	err = json.Unmarshal(*resp.Result, &updatedInfo)
+	return info, err
+}

@@ -38,6 +38,7 @@ import { bindActions } from 'utils/actionBinder';
 import { postMessageToParent, parseMessage, updateIframeHeight } from 'utils/post-message';
 import { useActions } from 'hooks/useAction';
 import { setCollapse } from 'store/thread/actions';
+import { CommentWithRanking } from 'common/types';
 
 import styles from './root.module.css';
 import { ScrollWarning } from 'components/scroll-warning/';
@@ -208,7 +209,7 @@ export class Root extends Component<Props, State> {
 
     const isCommentsDisabled = props.info.read_only!;
     const imageUploadHandler = isUserAnonymous(this.props.user) ? undefined : this.props.uploadImage;
-
+    const scrollWarning = props.info.scroll_warning;
     return (
       <Fragment>
         <AuthPanel
@@ -235,7 +236,7 @@ export class Root extends Component<Props, State> {
               onUnblockSomeone={this.onUnblockSomeone}
             />
           ) : (
-            <>
+            <Fragment>
               {!isCommentsDisabled && (
                 <CommentForm
                   id={encodeURI(url || '')}
@@ -278,8 +279,10 @@ export class Root extends Component<Props, State> {
                 topComments={props.topComments}
                 showMore={this.showMore}
                 topCommentsWithWarning={props.topCommentsWithWarning}
+                scrollWarning={scrollWarning}
+                sort={props.sort}
               />
-            </>
+            </Fragment>
           )}
         </div>
       </Fragment>
@@ -292,51 +295,68 @@ interface CommentsProps {
   topComments: string[];
   commentsShown: number;
   showMore(): void;
-  topCommentsWithWarning: Record<string, boolean>;
+  topCommentsWithWarning?: CommentWithRanking[];
+  scrollWarning?: number;
+  sort?: string;
 }
-function Comments({ isLoading, topComments, commentsShown, showMore, topCommentsWithWarning }: CommentsProps) {
+function Comments({
+  isLoading,
+  topComments,
+  commentsShown,
+  showMore,
+  topCommentsWithWarning,
+  scrollWarning,
+  sort,
+}: CommentsProps) {
   const renderComments =
-    IS_MOBILE && commentsShown < topComments.length ? topComments.slice(0, commentsShown) : topComments;
-  const renderCommentsWithWarning =
-    IS_MOBILE && commentsShown < topComments.length
-      ? Object.entries(topCommentsWithWarning).slice(0, commentsShown)
-      : Object.entries(topCommentsWithWarning);
-
+    IS_MOBILE && commentsShown < topComments.length && topCommentsWithWarning
+      ? topCommentsWithWarning.slice(0, commentsShown)
+      : topCommentsWithWarning;
+  let warningRendered = false;
   const isShowMoreButtonVisible = IS_MOBILE && commentsShown < topComments.length;
-  console.log(topCommentsWithWarning);
-  console.log(topComments);
   return (
     <div className="root__threads" role="list">
       {isLoading ? (
         <Preloader className="root__preloader" />
       ) : (
-        <>
-          {/* {topComments.length > 0 &&
-              renderComments.map((id) => {
+        <Fragment>
+          {topCommentsWithWarning &&
+            topCommentsWithWarning.length > 0 &&
+            (renderComments ?? []).map(({ id, rank }) => {
+              // if we have a scroll warning and we are rendering the first comment above the threshold, render the warning
+              if (sort === 'rank' && scrollWarning && rank && rank >= scrollWarning && !warningRendered) {
+                warningRendered = true;
                 return (
-                  <Thread key={`thread-${id}`} id={id} mix="root__thread" level={0} getPreview={getPreview} />
-                )
-              })} */}
-          {renderComments.length > 0 &&
-            renderCommentsWithWarning.map(([id, warning]) => {
-              console.log('test');
-              console.log(id);
-              if (warning) {
-                return (
-                  <>
+                  <Fragment>
                     <ScrollWarning>Scroll Warning</ScrollWarning>
-                    <Thread key={`thread-${id}`} id={id} mix="root__thread" level={0} getPreview={getPreview} />
-                  </>
+                    <Thread
+                      key={`thread-${id}`}
+                      id={id}
+                      mix="root__thread"
+                      level={0}
+                      getPreview={getPreview}
+                      scrollWarning={scrollWarning}
+                    />
+                  </Fragment>
                 );
               }
-              return <Thread key={`thread-${id}`} id={id} mix="root__thread" level={0} getPreview={getPreview} />;
+              return (
+                <Thread
+                  key={`thread-${id}`}
+                  id={id}
+                  mix="root__thread"
+                  level={0}
+                  getPreview={getPreview}
+                  scrollWarning={scrollWarning}
+                />
+              );
             })}
           {isShowMoreButtonVisible && (
             <Button className={clsx('more-comments', styles.moreComments)} onClick={showMore}>
               <FormattedMessage id="root.show-more" defaultMessage="Show more" />
             </Button>
           )}
-        </>
+        </Fragment>
       )}
     </div>
   );

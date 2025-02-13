@@ -40,7 +40,7 @@ type DataStore struct {
 	RestrictedWordsMatcher *RestrictedWordsMatcher
 	ImageService           *image.Service
 	AdminEdits             bool // allow admin unlimited edits
-
+	RankerUrl              string
 	// granular locks
 	scopedLocks struct {
 		sync.Mutex
@@ -105,22 +105,27 @@ func (s *DataStore) Create(comment store.Comment) (commentID string, err error) 
 	}()
 
 	commentID, err = s.Engine.Create(comment)
+	if err != nil {
+		return commentID, err
+	}
 	s.submitImages(comment)
 
 	if e := s.AdminStore.OnEvent(comment.Locator.SiteID, admin.EvCreate); e != nil {
 		log.Printf("[WARN] failed to send create event, %s", e)
 	}
 
-	// ranker comes here
-
-	
-	// 1. get all comments for site
+	// get all comments for site
 	req := engine.FindRequest{Locator: comment.Locator, Sort: "time", Since: time.Time{}}
 	comments, err := s.Engine.Find(req)
-	fmt.Println("comments when saved:")
-	fmt.Println(comments)
+	if err != nil {
+		return commentID, err
+	}
 
-	comments = rank(comments)
+	comments, scroll_warning_rank := rank(comments, s.RankerUrl)
+	// set the scroll warning value in the post info object
+	if scroll_warning_rank != -1 {
+		s.Engine.SetScrollWarning(comment.Locator, scroll_warning_rank)
+	}
 
 	for _, comment := range comments {
 		err = s.Engine.Update(comment)
@@ -133,14 +138,9 @@ func (s *DataStore) Create(comment store.Comment) (commentID string, err error) 
 	newcomments, err := s.Engine.Find(req)
 	fmt.Println("comments overwritten:")
 	fmt.Println(newcomments)
-	// 2. prepare ranking request
-
-	// 3. send ranking request
-
-	// 4. get ranking response
-
-	// 5. update ranks for all comments
-
+	for _, comment := range comments {
+		fmt.Print("comment id: "+comment.ID+" rank: ", comment.Rank, "text: "+comment.Text+"\n")
+	}
 	return commentID, err
 }
 

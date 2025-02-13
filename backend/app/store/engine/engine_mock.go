@@ -4,7 +4,7 @@
 package engine
 
 import (
-	store "github.com/umputun/remark42/backend/app/store"
+	"github.com/umputun/remark42/backend/app/store"
 	"sync"
 )
 
@@ -45,6 +45,9 @@ var _ Interface = &InterfaceMock{}
 //			ListFlagsFunc: func(req FlagRequest) ([]interface{}, error) {
 //				panic("mock out the ListFlags method")
 //			},
+//			SetScrollWarningFunc: func(locator store.Locator, scrollWarning int) (store.PostInfo, error) {
+//				panic("mock out the SetScrollWarning method")
+//			},
 //			UpdateFunc: func(comment store.Comment) error {
 //				panic("mock out the Update method")
 //			},
@@ -84,6 +87,9 @@ type InterfaceMock struct {
 
 	// ListFlagsFunc mocks the ListFlags method.
 	ListFlagsFunc func(req FlagRequest) ([]interface{}, error)
+
+	// SetScrollWarningFunc mocks the SetScrollWarning method.
+	SetScrollWarningFunc func(locator store.Locator, scrollWarning int) (store.PostInfo, error)
 
 	// UpdateFunc mocks the Update method.
 	UpdateFunc func(comment store.Comment) error
@@ -136,6 +142,13 @@ type InterfaceMock struct {
 			// Req is the req argument value.
 			Req FlagRequest
 		}
+		// SetScrollWarning holds details about calls to the SetScrollWarning method.
+		SetScrollWarning []struct {
+			// Locator is the locator argument value.
+			Locator store.Locator
+			// ScrollWarning is the scrollWarning argument value.
+			ScrollWarning int
+		}
 		// Update holds details about calls to the Update method.
 		Update []struct {
 			// Comment is the comment argument value.
@@ -147,17 +160,18 @@ type InterfaceMock struct {
 			Req UserDetailRequest
 		}
 	}
-	lockClose      sync.RWMutex
-	lockCount      sync.RWMutex
-	lockCreate     sync.RWMutex
-	lockDelete     sync.RWMutex
-	lockFind       sync.RWMutex
-	lockFlag       sync.RWMutex
-	lockGet        sync.RWMutex
-	lockInfo       sync.RWMutex
-	lockListFlags  sync.RWMutex
-	lockUpdate     sync.RWMutex
-	lockUserDetail sync.RWMutex
+	lockClose            sync.RWMutex
+	lockCount            sync.RWMutex
+	lockCreate           sync.RWMutex
+	lockDelete           sync.RWMutex
+	lockFind             sync.RWMutex
+	lockFlag             sync.RWMutex
+	lockGet              sync.RWMutex
+	lockInfo             sync.RWMutex
+	lockListFlags        sync.RWMutex
+	lockSetScrollWarning sync.RWMutex
+	lockUpdate           sync.RWMutex
+	lockUserDetail       sync.RWMutex
 }
 
 // Close calls CloseFunc.
@@ -440,6 +454,42 @@ func (mock *InterfaceMock) ListFlagsCalls() []struct {
 	mock.lockListFlags.RLock()
 	calls = mock.calls.ListFlags
 	mock.lockListFlags.RUnlock()
+	return calls
+}
+
+// SetScrollWarning calls SetScrollWarningFunc.
+func (mock *InterfaceMock) SetScrollWarning(locator store.Locator, scrollWarning int) (store.PostInfo, error) {
+	if mock.SetScrollWarningFunc == nil {
+		panic("InterfaceMock.SetScrollWarningFunc: method is nil but Interface.SetScrollWarning was just called")
+	}
+	callInfo := struct {
+		Locator       store.Locator
+		ScrollWarning int
+	}{
+		Locator:       locator,
+		ScrollWarning: scrollWarning,
+	}
+	mock.lockSetScrollWarning.Lock()
+	mock.calls.SetScrollWarning = append(mock.calls.SetScrollWarning, callInfo)
+	mock.lockSetScrollWarning.Unlock()
+	return mock.SetScrollWarningFunc(locator, scrollWarning)
+}
+
+// SetScrollWarningCalls gets all the calls that were made to SetScrollWarning.
+// Check the length with:
+//
+//	len(mockedInterface.SetScrollWarningCalls())
+func (mock *InterfaceMock) SetScrollWarningCalls() []struct {
+	Locator       store.Locator
+	ScrollWarning int
+} {
+	var calls []struct {
+		Locator       store.Locator
+		ScrollWarning int
+	}
+	mock.lockSetScrollWarning.RLock()
+	calls = mock.calls.SetScrollWarning
+	mock.lockSetScrollWarning.RUnlock()
 	return calls
 }
 

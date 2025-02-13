@@ -1007,15 +1007,36 @@ func (b *BoltDB) setInfo(tx *bolt.Tx, comment store.Comment) (store.PostInfo, er
 	info := store.PostInfo{}
 	if err := b.load(infoBkt, comment.Locator.URL, &info); err != nil {
 		info = store.PostInfo{
-			Count:   0,
-			URL:     comment.Locator.URL,
-			FirstTS: comment.Timestamp,
-			LastTS:  comment.Timestamp,
+			Count:         0,
+			URL:           comment.Locator.URL,
+			FirstTS:       comment.Timestamp,
+			LastTS:        comment.Timestamp,
+			ScrollWarning: 1, // set scroll warning to 1 to prevent anything from showing first //todo is this neecessary?
 		}
 	}
 	info.Count++
 	info.LastTS = comment.Timestamp
 	err := b.save(infoBkt, comment.Locator.URL, &info)
+	return info, err
+}
+
+func (b *BoltDB) SetScrollWarning(locator store.Locator, scrollWarning int) (store.PostInfo, error) {
+	bdb, err := b.db(locator.SiteID)
+	info := store.PostInfo{}
+	if err != nil {
+		return info, err
+	}
+	info.URL = locator.URL
+	err = bdb.Update(func(tx *bolt.Tx) (err error) {
+		infoBkt := tx.Bucket([]byte(infoBucketName))
+		if err := b.load(infoBkt, locator.URL, &info); err != nil {
+			return err
+		}
+		info.ScrollWarning = scrollWarning
+		fmt.Println("PostInfo", info)
+		err = b.save(infoBkt, locator.URL, &info)
+		return err
+	})
 	return info, err
 }
 

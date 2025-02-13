@@ -47,11 +47,12 @@ type Edit struct {
 
 // PostInfo holds summary for given post url
 type PostInfo struct {
-	URL      string    `json:"url,omitempty"` // can be attached to site-wide comments but won't be set then
-	Count    int       `json:"count"`
-	ReadOnly bool      `json:"read_only,omitempty" bson:"read_only,omitempty"` // can be attached to site-wide comments but won't be set then
-	FirstTS  time.Time `json:"first_time,omitempty" bson:"first_time,omitempty"`
-	LastTS   time.Time `json:"last_time,omitempty" bson:"last_time,omitempty"`
+	URL           string    `json:"url,omitempty"` // can be attached to site-wide comments but won't be set then
+	Count         int       `json:"count"`
+	ReadOnly      bool      `json:"read_only,omitempty" bson:"read_only,omitempty"` // can be attached to site-wide comments but won't be set then
+	FirstTS       time.Time `json:"first_time,omitempty" bson:"first_time,omitempty"`
+	LastTS        time.Time `json:"last_time,omitempty" bson:"last_time,omitempty"`
+	ScrollWarning int       `json:"scroll_warning"`
 }
 
 // BlockedUser holds id and ts for blocked user

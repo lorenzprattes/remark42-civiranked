@@ -89,6 +89,7 @@ export interface PostInfo {
   read_only?: boolean;
   first_time?: string;
   last_time?: string;
+  scroll_warning?: number;
 }
 
 export interface Tree {
@@ -138,9 +139,7 @@ export type Sorting =
   | '+score'
   | '-controversy'
   | '+controversy'
-  | 'rank'
-  | '-rank'
-  | '+rank';
+  | 'rank';
 export type BlockTTL = 'permanently' | '43200m' | '10080m' | '1440m';
 export type Theme = 'light' | 'dark';
 
@@ -181,4 +180,9 @@ export interface ApiError {
 export interface EmailSubVerificationStatus {
   updated: boolean;
   address: string;
+}
+
+export interface CommentWithRanking {
+  id: Comment['id'];
+  rank: number | undefined;
 }
