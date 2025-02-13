@@ -89,6 +89,7 @@ interface State {
   isSettingsVisible: boolean;
   commentsShown: number;
   wasSomeoneUnblocked: boolean;
+  recentlyAdded: string[];
 }
 
 const messages = defineMessages({
@@ -114,6 +115,7 @@ export class Root extends Component<Props, State> {
     commentsShown: maxShownComments,
     wasSomeoneUnblocked: false,
     isSettingsVisible: false,
+    recentlyAdded: [],
   };
 
   componentDidMount() {
@@ -245,7 +247,10 @@ export class Root extends Component<Props, State> {
                   mix="root__input"
                   mode="main"
                   user={props.user}
-                  onSubmit={(text: string, title: string) => this.props.addComment(text, title)}
+                  onSubmit={(text: string, title: string) => {
+                    let addedComment = this.props.addComment(text, title);
+                    return addedComment;
+                  }}
                   getPreview={this.props.getPreview}
                   uploadImage={imageUploadHandler}
                 />

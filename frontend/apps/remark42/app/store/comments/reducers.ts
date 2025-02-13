@@ -57,7 +57,8 @@ export const topCommentsWithWarning = (
     }
     case COMMENTS_APPEND: {
       if (action.comment.pid) return state;
-      return [{ id: action.comment.id, rank: action.comment.rank }, ...state];
+      // if the user adds a new comment, it will automattically appear at the top until ranked(refresh), therefore excempt from ranking
+      return [{ id: action.comment.id, rank: -1 }, ...state];
     }
     default:
       return state;

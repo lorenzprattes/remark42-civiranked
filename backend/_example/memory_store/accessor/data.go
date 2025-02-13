@@ -572,3 +572,8 @@ func (m *MemData) match(comments []store.Comment, fn func(c store.Comment) bool)
 	}
 	return res
 }
+
+func (m *MemData) SetScrollWarning(locator store.Locator, scrollWarning int) (store.PostInfo, error) {
+	// implement the method as needed
+	return store.PostInfo{}, nil
+}

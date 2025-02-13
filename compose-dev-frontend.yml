@@ -47,7 +47,7 @@ services:
       - ADMIN_SHARED_ID=dev_user # set admin flag for default user on local oauth2
       - AUTH_ANON=true
       - AUTH_EMAIL_ENABLE=true
-      - CIVIRANK_ADDRESS="http://civirank:8000/rank_comments"
+      - CIVIRANK_ADDRESS=http://civirank:8000/rank_comments
     volumes:
       - ./var:/srv/var
     networks:
