@@ -105,42 +105,12 @@ func (s *DataStore) Create(comment store.Comment) (commentID string, err error) 
 	}()
 
 	commentID, err = s.Engine.Create(comment)
-	if err != nil {
-		return commentID, err
-	}
 	s.submitImages(comment)
 
 	if e := s.AdminStore.OnEvent(comment.Locator.SiteID, admin.EvCreate); e != nil {
 		log.Printf("[WARN] failed to send create event, %s", e)
 	}
-
-	// get all comments for site
-	req := engine.FindRequest{Locator: comment.Locator, Sort: "time", Since: time.Time{}}
-	comments, err := s.Engine.Find(req)
-	if err != nil {
-		return commentID, err
-	}
-
-	comments, scroll_warning_rank := rank(comments, s.RankerUrl)
-	// set the scroll warning value in the post info object
-	if scroll_warning_rank != -1 {
-		s.Engine.SetScrollWarning(comment.Locator, scroll_warning_rank)
-	}
-
-	for _, comment := range comments {
-		err = s.Engine.Update(comment)
-		if err != nil {
-			fmt.Println("error updating comment")
-			fmt.Println(err)
-		}
-	}
-
-	newcomments, err := s.Engine.Find(req)
-	fmt.Println("comments overwritten:")
-	fmt.Println(newcomments)
-	for _, comment := range comments {
-		fmt.Print("comment id: "+comment.ID+" rank: ", comment.Rank, "text: "+comment.Text+"\n")
-	}
+	go rank(s.RankerUrl, s.Engine, comment.Locator)
 	return commentID, err
 }
 

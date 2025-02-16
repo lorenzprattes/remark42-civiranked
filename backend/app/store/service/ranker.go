@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/umputun/remark42/backend/app/store"
+	"github.com/umputun/remark42/backend/app/store/engine"
 )
 
 type RankingRequest struct {
@@ -22,7 +24,14 @@ type RankingResponse struct {
 	WarningIndex int            `json:"warning_index"`
 }
 
-func rank(comments []store.Comment, rankerUrl string) ([]store.Comment, int) {
+func rank(rankerUrl string, engineInstance engine.Interface, locator store.Locator) {
+	engineRequest := engine.FindRequest{Locator: locator, Sort: "time", Since: time.Time{}}
+	comments, err := engineInstance.Find(engineRequest)
+	if err != nil {
+		fmt.Println("error finding comments")
+		return
+	}
+
 	var rankingRequest []RankingRequest
 	for _, comment := range comments {
 		rankingRequest = append(rankingRequest, RankingRequest{
@@ -41,6 +50,7 @@ func rank(comments []store.Comment, rankerUrl string) ([]store.Comment, int) {
 	rankingRequestsJSON, err := json.Marshal(jsonData)
 	if err != nil {
 		fmt.Println("Error marshaling JSON:", err)
+		return
 	} else {
 		fmt.Println("Ranking requests JSON:", string(rankingRequestsJSON))
 	}
@@ -49,6 +59,7 @@ func rank(comments []store.Comment, rankerUrl string) ([]store.Comment, int) {
 	req, err := http.NewRequest("POST", rankerUrl, bytes.NewBuffer(rankingRequestsJSON))
 	if err != nil {
 		fmt.Println("Error creating request:", err)
+		return
 	}
 	req.Header.Set("Content-Type", "application/json")
 
@@ -56,6 +67,7 @@ func rank(comments []store.Comment, rankerUrl string) ([]store.Comment, int) {
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Println("Error sending request:", err)
+		return
 	}
 	defer resp.Body.Close()
 
@@ -64,10 +76,12 @@ func rank(comments []store.Comment, rankerUrl string) ([]store.Comment, int) {
 		fmt.Println("Request successful")
 	} else {
 		fmt.Printf("Request failed with status code: %d\n", resp.StatusCode)
+		return
 	}
 	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println("Error reading response body:", err)
+		return
 	}
 
 	bodyString := string(bodyBytes)
@@ -77,6 +91,7 @@ func rank(comments []store.Comment, rankerUrl string) ([]store.Comment, int) {
 	if err := json.Unmarshal(bodyBytes, &result); err != nil {
 		// Handle error, default to local rank comparison
 		fmt.Println("Error unmarshaling:", err)
+		return
 	}
 
 	for i := range comments {
@@ -91,5 +106,23 @@ func rank(comments []store.Comment, rankerUrl string) ([]store.Comment, int) {
 			comments[i].Warning = false
 		}
 	}
-	return comments, result.WarningIndex
+
+	if result.WarningIndex != -1 {
+		engineInstance.SetScrollWarning(locator, result.WarningIndex)
+	}
+
+	for _, comment := range comments {
+		err = engineInstance.Update(comment)
+		if err != nil {
+			fmt.Println("error updating comment")
+			fmt.Println(err)
+		}
+	}
+
+	newcomments, err := engineInstance.Find(engineRequest)
+	fmt.Println("comments overwritten:")
+	fmt.Println(newcomments)
+	for _, comment := range comments {
+		fmt.Print("comment id: "+comment.ID+" rank: ", comment.Rank, "text: "+comment.Text+"\n")
+	}
 }
