@@ -38,7 +38,7 @@ export const Thread: FunctionComponent<Props> = ({ id, level, mix, getPreview, s
   const collapse = useCallback(() => {
     dispatch(setCollapse(id, !collapsed));
   }, [id, collapsed, dispatch]);
-  const [showWarned, setShowExceeded] = useState(false);
+  const [showAboveThreshold, setShowAboveThreshold] = useState(false);
 
   let childsWithRanking;
 
@@ -49,10 +49,10 @@ export const Thread: FunctionComponent<Props> = ({ id, level, mix, getPreview, s
     });
   }
 
-  const belowWarning = scrollWarning
+  const belowThreshold = scrollWarning
     ? (childsWithRanking || []).filter((child) => child.rank !== undefined && child.rank < scrollWarning)
     : undefined;
-  const aboveWarning = scrollWarning
+  const aboveThreshold = scrollWarning
     ? (childsWithRanking || []).filter((child) => child.rank !== undefined && child.rank >= scrollWarning)
     : undefined;
 
@@ -104,26 +104,26 @@ export const Thread: FunctionComponent<Props> = ({ id, level, mix, getPreview, s
       ) : (
         <Fragment>
           {!collapsed &&
-            (belowWarning ?? []).map(({ id }) => (
+            (belowThreshold ?? []).map(({ id }) => (
               <Thread key={`thread-${id}`} id={id} level={Math.min(level + 1, 6)} getPreview={getPreview} />
             ))}
 
-          {!collapsed && (aboveWarning ?? []).length > 0 && (
+          {!collapsed && (aboveThreshold ?? []).length > 0 && (
             <div>
               <button
                 className={b('thread', { mix: undefined }, { level: level + 1, theme, indented: true })}
                 aria-expanded={!collapsed}
-                onClick={() => setShowExceeded(!showWarned)}
+                onClick={() => setShowAboveThreshold(!showAboveThreshold)}
                 style={{ border: '1px solid #ccc', padding: '5px 10px', marginTop: '10px' }}
               >
                 <div style={{ fontSize: '0.8em', color: '#666' }}>
-                  {showWarned
+                  {showAboveThreshold
                     ? 'Click to hide the comments above the warning threshold.'
                     : 'Click to show the hidden comments'}
                 </div>
               </button>
-              {showWarned &&
-                (aboveWarning ?? []).map(({ id }) => (
+              {showAboveThreshold &&
+                (aboveThreshold ?? []).map(({ id }) => (
                   <Thread key={`thread-${id}`} id={id} level={Math.min(level + 1, 6)} getPreview={getPreview} />
                 ))}
             </div>

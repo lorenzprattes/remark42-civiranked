@@ -1,5 +1,5 @@
 import { h, Component, Fragment } from 'preact';
-import { useEffect } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
 import { useSelector } from 'react-redux';
 import b from 'bem-react-helper';
 import { IntlShape, useIntl, FormattedMessage, defineMessages } from 'react-intl';
@@ -313,11 +313,18 @@ function Comments({
   scrollWarning,
   sort,
 }: CommentsProps) {
+  const [showAboveThreshold, setShowAboveThreshold] = useState(false);
+
   const renderComments =
     IS_MOBILE && commentsShown < topComments.length && topCommentsWithWarning
       ? topCommentsWithWarning.slice(0, commentsShown)
       : topCommentsWithWarning;
-  let warningRendered = false;
+  const belowWarning = scrollWarning
+    ? (renderComments || []).filter((child) => child.rank !== undefined && child.rank < scrollWarning)
+    : undefined;
+  const aboveWarning = scrollWarning
+    ? (renderComments || []).filter((child) => child.rank !== undefined && child.rank >= scrollWarning)
+    : undefined;
   const isShowMoreButtonVisible = IS_MOBILE && commentsShown < topComments.length;
   return (
     <div className="root__threads" role="list">
@@ -325,15 +332,12 @@ function Comments({
         <Preloader className="root__preloader" />
       ) : (
         <Fragment>
-          {topCommentsWithWarning &&
-            topCommentsWithWarning.length > 0 &&
-            (renderComments ?? []).map(({ id, rank }) => {
-              // if we have a scroll warning and we are rendering the first comment above the threshold, render the warning
-              if (sort === 'rank' && scrollWarning && rank && rank >= scrollWarning && !warningRendered) {
-                warningRendered = true;
-                return (
-                  <Fragment>
-                    <ScrollWarning>Scroll Warning</ScrollWarning>
+          {!scrollWarning ? (
+            <Fragment>
+              {renderComments &&
+                renderComments.length > 0 &&
+                (renderComments ?? []).map(({ id, rank }) => {
+                  return (
                     <Thread
                       key={`thread-${id}`}
                       id={id}
@@ -342,10 +346,12 @@ function Comments({
                       getPreview={getPreview}
                       scrollWarning={scrollWarning}
                     />
-                  </Fragment>
-                );
-              }
-              return (
+                  );
+                })}
+            </Fragment>
+          ) : (
+            <Fragment>
+              {(belowWarning ?? []).map(({ id }) => (
                 <Thread
                   key={`thread-${id}`}
                   id={id}
@@ -354,8 +360,21 @@ function Comments({
                   getPreview={getPreview}
                   scrollWarning={scrollWarning}
                 />
-              );
-            })}
+              ))}
+              <ScrollWarning setShowAboveThreshold={setShowAboveThreshold} showAboveThreshold={showAboveThreshold} />
+              {showAboveThreshold &&
+                (aboveWarning ?? []).map(({ id }) => (
+                  <Thread
+                    key={`thread-${id}`}
+                    id={id}
+                    mix="root__thread"
+                    level={0}
+                    getPreview={getPreview}
+                    scrollWarning={scrollWarning}
+                  />
+                ))}
+            </Fragment>
+          )}
           {isShowMoreButtonVisible && (
             <Button className={clsx('more-comments', styles.moreComments)} onClick={showMore}>
               <FormattedMessage id="root.show-more" defaultMessage="Show more" />

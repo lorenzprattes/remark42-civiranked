@@ -1011,7 +1011,7 @@ func (b *BoltDB) setInfo(tx *bolt.Tx, comment store.Comment) (store.PostInfo, er
 			URL:           comment.Locator.URL,
 			FirstTS:       comment.Timestamp,
 			LastTS:        comment.Timestamp,
-			ScrollWarning: 1, // set scroll warning to 1 to prevent anything from showing first //todo is this neecessary?
+			ScrollWarning: -1, // set scroll warning to -1 to prevent from showing a warning first
 		}
 	}
 	info.Count++

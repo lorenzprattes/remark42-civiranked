@@ -117,7 +117,7 @@ func (d *Commento) convert(r io.Reader, siteID string) (ch chan store.Comment) {
 				parentID = ""
 			}
 
-			commentURL, e := url.JoinPath("https://", comment.Domain, comment.Path)
+			commentURL, e := url.JoinPath("http://", comment.Domain, comment.Path) //this was changed for importing by hand for local testing, todo: revert when finished evalutaing
 			if e != nil {
 				log.Printf("[WARN] can't construct comment URL in commento import, %s", err.Error())
 			}
