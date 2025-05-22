@@ -9,6 +9,7 @@ const DefaultPostInfo: PostInfo = {
   read_only: false,
   first_time: '',
   last_time: '',
+  scroll_warning: -1,
 };
 
 export function info(state: PostInfo = DefaultPostInfo, action: POST_INFO_SET_ACTION): PostInfo {

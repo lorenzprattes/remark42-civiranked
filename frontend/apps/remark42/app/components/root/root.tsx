@@ -314,7 +314,9 @@ function Comments({
   sort,
 }: CommentsProps) {
   const [showAboveThreshold, setShowAboveThreshold] = useState(false);
-
+  if (scrollWarning === -1) {
+    scrollWarning = undefined;
+  }
   const renderComments =
     IS_MOBILE && commentsShown < topComments.length && topCommentsWithWarning
       ? topCommentsWithWarning.slice(0, commentsShown)
@@ -332,7 +334,7 @@ function Comments({
         <Preloader className="root__preloader" />
       ) : (
         <Fragment>
-          {!scrollWarning ? (
+          {sort !== 'rank' || !scrollWarning ? (
             <Fragment>
               {renderComments &&
                 renderComments.length > 0 &&
@@ -413,7 +415,7 @@ export function ConnectedRoot() {
         <p className="root__copyright" role="contentinfo">
           <FormattedMessage
             id="root.powered-by"
-            defaultMessage="Powered by <a>Remark42</a>"
+            defaultMessage="CiviComments: Powered by <a>Remark42</a> and CiviRank"
             values={{ a: CopyrightLink }}
           />
         </p>

@@ -68,7 +68,6 @@ export interface Comment {
   rank?: number;
   /**display a warning here if true */
 
-  warning?: boolean;
   /**
    * @ClientOnly defines whether comments was hidden (deleted)
    *
@@ -131,6 +130,7 @@ export interface Config {
 }
 
 export type Sorting =
+  | 'rank'
   | '-time'
   | '+time'
   | '-active'
@@ -138,8 +138,7 @@ export type Sorting =
   | '-score'
   | '+score'
   | '-controversy'
-  | '+controversy'
-  | 'rank';
+  | '+controversy';
 export type BlockTTL = 'permanently' | '43200m' | '10080m' | '1440m';
 export type Theme = 'light' | 'dark';
 

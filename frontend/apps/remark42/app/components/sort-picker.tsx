@@ -47,7 +47,8 @@ export function SortPicker() {
 
   return (
     <span className="sort-picker">
-      <FormattedMessage id="sort-by" defaultMessage="Sort by" />{' '}
+      {/* disable formatted message if sort option equal to rank */}
+      {sort !== 'rank' && <FormattedMessage id="sort-by" defaultMessage="Sort by " />}
       <Select items={items} selected={selected} onChange={handleSortChange} />
     </span>
   );

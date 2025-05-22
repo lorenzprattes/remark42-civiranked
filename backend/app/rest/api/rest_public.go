@@ -83,6 +83,8 @@ func (s *public) findCommentsCtrl(w http.ResponseWriter, r *http.Request) {
 		var commentsInfo store.PostInfo
 		if info, ee := s.dataService.Info(locator, s.readOnlyAge); ee == nil {
 			commentsInfo = info
+		} else {
+			log.Printf("[WARN] can't get post info for %+v, %v", locator, ee)
 		}
 
 		if !since.IsZero() { // if since is set, number of comments can be different from total in the DB

@@ -13,10 +13,8 @@ import (
 )
 
 type RankingRequest struct {
-	ID        string `json:"id"`
-	ParentID  string `json:"parent_id"`
-	PostTitle string `json:"title"`
-	Text      string `json:"text"`
+	ID   string `json:"id"`
+	Text string `json:"text"`
 }
 
 type RankingResponse struct {
@@ -35,10 +33,8 @@ func rank(rankerUrl string, engineInstance engine.Interface, locator store.Locat
 	var rankingRequest []RankingRequest
 	for _, comment := range comments {
 		rankingRequest = append(rankingRequest, RankingRequest{
-			ID:        comment.ID,
-			ParentID:  comment.ParentID,
-			PostTitle: comment.PostTitle,
-			Text:      comment.Text,
+			ID:   comment.ID,
+			Text: comment.Text,
 		})
 	}
 	// Add the comments to a JSON object
@@ -46,7 +42,6 @@ func rank(rankerUrl string, engineInstance engine.Interface, locator store.Locat
 		"comments": rankingRequest,
 	}
 	fmt.Println("Sending ranking requests to remote server")
-	// Marshal the rankingRequests to JSON
 	rankingRequestsJSON, err := json.Marshal(jsonData)
 	if err != nil {
 		fmt.Println("Error marshaling JSON:", err)
@@ -101,15 +96,10 @@ func rank(rankerUrl string, engineInstance engine.Interface, locator store.Locat
 		if rank == result.WarningIndex {
 			fmt.Println("Warning index:", result.WarningIndex)
 			fmt.Println("Warning comment:", comments[i])
-			comments[i].Warning = true
-		} else {
-			comments[i].Warning = false
 		}
 	}
 
-	if result.WarningIndex != -1 {
-		engineInstance.SetScrollWarning(locator, result.WarningIndex)
-	}
+	engineInstance.SetScrollWarning(locator, result.WarningIndex)
 
 	for _, comment := range comments {
 		err = engineInstance.Update(comment)
@@ -117,12 +107,5 @@ func rank(rankerUrl string, engineInstance engine.Interface, locator store.Locat
 			fmt.Println("error updating comment")
 			fmt.Println(err)
 		}
-	}
-
-	newcomments, err := engineInstance.Find(engineRequest)
-	fmt.Println("comments overwritten:")
-	fmt.Println(newcomments)
-	for _, comment := range comments {
-		fmt.Print("comment id: "+comment.ID+" rank: ", comment.Rank, "text: "+comment.Text+"\n")
 	}
 }

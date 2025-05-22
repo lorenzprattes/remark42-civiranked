@@ -107,6 +107,11 @@ export const Thread: FunctionComponent<Props> = ({ id, level, mix, getPreview, s
             (belowThreshold ?? []).map(({ id }) => (
               <Thread key={`thread-${id}`} id={id} level={Math.min(level + 1, 6)} getPreview={getPreview} />
             ))}
+          {level < 6 && (
+            <div className={b('thread__collapse', { mods: { collapsed } })} {...getHandleClickProps(collapse)}>
+              <div />
+            </div>
+          )}
 
           {!collapsed && (aboveThreshold ?? []).length > 0 && (
             <div>

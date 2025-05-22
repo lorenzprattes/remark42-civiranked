@@ -4,7 +4,13 @@ services:
   remark:
     # remove the next line in case you want to use this docker-compose separately
     # as otherwise it would complain for absence of Dockerfile
-    build: .
+    build: 
+      context: .
+      args:         
+        - SKIP_BACKEND_TEST=true
+        - SKIP_FRONTEND_BUILD=true
+        - SKIP_FRONTEND_TEST=true
+
     image: umputun/remark42:latest
     container_name: "remark42"
     hostname: "remark42"
@@ -18,8 +24,12 @@ services:
 
     # uncomment to expose directly (no proxy)
     #ports:
-    #  - "80:8080"
+    #  - "8080:8080"
     #  - "443:8443"
+    ports:
+      - "8080:8080" # primary rest server
+      - "8084:8084"
+
 
     environment:
       - REMARK_URL

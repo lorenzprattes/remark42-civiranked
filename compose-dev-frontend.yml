@@ -36,6 +36,7 @@ services:
       - "8080:8080" # primary rest server
       - "8084:8084" # local oauth2 server
 
+
     environment:
       # REMARK_URL below would be used for the dev auth,
       # so that it would work on http://127.0.0.1 but wouldn't on http://localhost
@@ -50,10 +51,10 @@ services:
       - CIVIRANK_ADDRESS=http://civirank:8000/rank_comments
     volumes:
       - ./var:/srv/var
-    networks:
-      - network1
-networks:
-  network1:
-    name: dev-network
-    external: true
+#     networks:
+#       - network1
+# networks:
+#   network1:
+#     name: dev-network
+#     external: true
 
